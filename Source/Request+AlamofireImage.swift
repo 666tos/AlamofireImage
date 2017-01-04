@@ -79,7 +79,7 @@ extension DataRequest {
     public class func imageResponseSerializer(
         imageScale: CGFloat = DataRequest.imageScale,
         inflateResponseImage: Bool = true)
-        -> DataResponseSerializer<Image>
+        -> DataResponseSerializer<MetadataImage>
     {
         return DataResponseSerializer { request, response, data, error in
             let result = serializeResponseData(response: response, data: data, error: error)
@@ -92,7 +92,7 @@ extension DataRequest {
                 let image = try DataRequest.image(from: data, withImageScale: imageScale)
                 if inflateResponseImage { image.af_inflate() }
 
-                return .success(image)
+                return .success(MetadataImage(image, headers: response?.allHeaderFields))
             } catch {
                 return .failure(error)
             }
@@ -122,7 +122,7 @@ extension DataRequest {
     public func responseImage(
         imageScale: CGFloat = DataRequest.imageScale,
         inflateResponseImage: Bool = true,
-        completionHandler: @escaping (DataResponse<Image>) -> Void)
+        completionHandler: @escaping (DataResponse<MetadataImage>) -> Void)
         -> Self
     {
         return response(
@@ -215,7 +215,7 @@ extension DataRequest {
     /// Creates a response serializer that returns an image initialized from the response data.
     ///
     /// - returns: An image response serializer.
-    public class func imageResponseSerializer() -> DataResponseSerializer<Image> {
+    public class func imageResponseSerializer() -> DataResponseSerializer<MetadataImage> {
         return DataResponseSerializer { request, response, data, error in
             let result = serializeResponseData(response: response, data: data, error: error)
 
@@ -247,7 +247,7 @@ extension DataRequest {
     ///
     /// - returns: The request.
     @discardableResult
-    public func responseImage(completionHandler: @escaping (DataResponse<Image>) -> Void) -> Self {
+    public func responseImage(completionHandler: @escaping (DataResponse<MetadataImage>) -> Void) -> Self {
         return response(
             responseSerializer: DataRequest.imageResponseSerializer(),
             completionHandler: completionHandler

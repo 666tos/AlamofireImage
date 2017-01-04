@@ -124,7 +124,7 @@ class ImageDownloaderTestCase: BaseTestCase {
         let urlRequest = try! URLRequest(url: "https://httpbin.org/image/jpeg", method: .get)
         let expectation = self.expectation(description: "image download should succeed")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         downloader.download(urlRequest) { closureResponse in
@@ -240,7 +240,7 @@ class ImageDownloaderTestCase: BaseTestCase {
         let urlRequest = try! URLRequest(url: "https://httpbin.org/get", method: .get)
         let expectation = self.expectation(description: "download request should fail")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         downloader.download(urlRequest) { closureResponse in
@@ -273,7 +273,7 @@ class ImageDownloaderTestCase: BaseTestCase {
         let urlRequest = try! URLRequest(url: "https://httpbin.org/image/jpeg", method: .get)
         let expectation = self.expectation(description: "image download should succeed")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         downloader.download(urlRequest) { closureResponse in
@@ -302,7 +302,7 @@ class ImageDownloaderTestCase: BaseTestCase {
 
         let expectation = self.expectation(description: "image download should succeed")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         downloader.download(urlRequest, filter: filter) { closureResponse in
@@ -490,7 +490,7 @@ class ImageDownloaderTestCase: BaseTestCase {
 
         let expectation = self.expectation(description: "download request should succeed")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         let requestReceipt = downloader.download(urlRequest) { closureResponse in
@@ -526,8 +526,8 @@ class ImageDownloaderTestCase: BaseTestCase {
         let expectation1 = expectation(description: "download request 1 should succeed")
         let expectation2 = expectation(description: "download request 2 should succeed")
 
-        var response1: DataResponse<Image>?
-        var response2: DataResponse<Image>?
+        var response1: DataResponse<MetadataImage>?
+        var response2: DataResponse<MetadataImage>?
 
         // When
         let requestReceipt1 = downloader.download(urlRequest1) { closureResponse in
@@ -805,7 +805,7 @@ class ImageDownloaderTestCase: BaseTestCase {
         let urlRequest = try! URLRequest(url: "https://httpbin.org/image/jpeg", method: .get)
         let expectation = self.expectation(description: "image download should succeed")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         downloader.download(urlRequest) { closureResponse in

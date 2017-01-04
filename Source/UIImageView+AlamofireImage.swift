@@ -215,7 +215,7 @@ extension UIImageView {
         progressQueue: DispatchQueue = DispatchQueue.main,
         imageTransition: ImageTransition = .noTransition,
         runImageTransitionIfCached: Bool = false,
-        completion: ((DataResponse<UIImage>) -> Void)? = nil)
+        completion: ((DataResponse<MetadataImage>) -> Void)? = nil)
     {
         guard let urlString = urlString, let url = URL(string: urlString) else {
             if let placeholderImage = placeholderImage {
@@ -282,7 +282,7 @@ extension UIImageView {
         progressQueue: DispatchQueue = DispatchQueue.main,
         imageTransition: ImageTransition = .noTransition,
         runImageTransitionIfCached: Bool = false,
-        completion: ((DataResponse<UIImage>) -> Void)? = nil)
+        completion: ((DataResponse<MetadataImage>) -> Void)? = nil)
     {
         af_setImage(
             withURLRequest: urlRequest(with: url),
@@ -341,11 +341,11 @@ extension UIImageView {
         progressQueue: DispatchQueue = DispatchQueue.main,
         imageTransition: ImageTransition = .noTransition,
         runImageTransitionIfCached: Bool = false,
-        completion: ((DataResponse<UIImage>) -> Void)? = nil)
+        completion: ((DataResponse<MetadataImage>) -> Void)? = nil)
     {
         guard !isURLRequestURLEqualToActiveRequestURL(urlRequest) else {
             let error = AFIError.requestCancelled
-            let response = DataResponse<UIImage>(request: nil, response: nil, data: nil, result: .failure(error))
+            let response = DataResponse<MetadataImage>(request: nil, response: nil, data: nil, result: .failure(error))
 
             completion?(response)
 
@@ -362,18 +362,18 @@ extension UIImageView {
             let request = urlRequest.urlRequest,
             let image = imageCache?.image(for: request, withIdentifier: filter?.identifier)
         {
-            let response = DataResponse<UIImage>(request: request, response: nil, data: nil, result: .success(image))
+            let response = DataResponse<MetadataImage>(request: request, response: nil, data: nil, result: .success(image))
 
             if runImageTransitionIfCached {
                 let tinyDelay = DispatchTime.now() + Double(Int64(0.001 * Float(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
 
                 // Need to let the runloop cycle for the placeholder image to take affect
                 DispatchQueue.main.asyncAfter(deadline: tinyDelay) {
-                    self.run(imageTransition, with: image, contentMode: contentMode)
+                    self.run(imageTransition, with: image.image, contentMode: contentMode)
                     completion?(response)
                 }
             } else {
-                self.image = image
+                self.image = image.image
                 self.contentMode = contentMode
                 completion?(response)
             }
@@ -408,7 +408,7 @@ extension UIImageView {
                 }
 
                 if let image = response.result.value {
-                    strongSelf.run(imageTransition, with: image, contentMode: contentMode)
+                    strongSelf.run(imageTransition, with: image.image, contentMode: contentMode)
                 }
 
                 strongSelf.af_activeRequestReceipt = nil

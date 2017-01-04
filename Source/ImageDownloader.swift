@@ -58,7 +58,7 @@ open class RequestReceipt {
 /// handlers for a single request.
 open class ImageDownloader {
     /// The completion handler closure used when an image download completes.
-    public typealias CompletionHandler = (DataResponse<Image>) -> Void
+    public typealias CompletionHandler = (DataResponse<MetadataImage>) -> Void
 
     /// The progress handler closure called periodically during an image download.
     public typealias ProgressHandler = DataRequest.ProgressHandler
@@ -286,7 +286,7 @@ open class ImageDownloader {
                 case .useProtocolCachePolicy, .returnCacheDataElseLoad, .returnCacheDataDontLoad:
                     if let image = self.imageCache?.image(for: request, withIdentifier: filter?.identifier) {
                         DispatchQueue.main.async {
-                            let response = DataResponse<Image>(
+                            let response = DataResponse<MetadataImage>(
                                 request: urlRequest.urlRequest,
                                 response: nil,
                                 data: nil,
@@ -323,7 +323,7 @@ open class ImageDownloader {
                 queue: self.responseQueue,
                 responseSerializer: imageResponseSerializer,
                 completionHandler: { [weak self] response in
-                    guard let strongSelf = self, let request = response.request else { return }
+                    guard let strongSelf = self, let request = response.request, let httpResponse = response.response else { return }
 
                     defer {
                         strongSelf.safelyDecrementActiveRequestCount()
@@ -349,21 +349,21 @@ open class ImageDownloader {
                                 if let alreadyFilteredImage = filteredImages[filter.identifier] {
                                     filteredImage = alreadyFilteredImage
                                 } else {
-                                    filteredImage = filter.filter(image)
+                                    filteredImage = filter.filter(image.image)
                                     filteredImages[filter.identifier] = filteredImage
                                 }
                             } else {
-                                filteredImage = image
+                                filteredImage = image.image
                             }
 
-                            strongSelf.imageCache?.add(filteredImage, for: request, withIdentifier: filter?.identifier)
-
+                            strongSelf.imageCache?.add(filteredImage, for: httpResponse, withIdentifier: filter?.identifier)
+                            
                             DispatchQueue.main.async {
-                                let response = DataResponse<Image>(
+                                let response = DataResponse<MetadataImage>(
                                     request: response.request,
                                     response: response.response,
                                     data: response.data,
-                                    result: .success(filteredImage),
+                                    result: .success(MetadataImage(filteredImage, headers: image.headers)),
                                     timeline: response.timeline
                                 )
 
@@ -456,7 +456,7 @@ open class ImageDownloader {
             if let index = responseHandler.operations.index(where: { $0.receiptID == requestReceipt.receiptID }) {
                 let operation = responseHandler.operations.remove(at: index)
 
-                let response: DataResponse<Image> = {
+                let response: DataResponse<MetadataImage> = {
                     let urlRequest = requestReceipt.request.request
                     let error = AFIError.requestCancelled
 

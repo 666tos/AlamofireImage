@@ -65,7 +65,7 @@ class DataRequestTestCase: BaseTestCase {
         let urlString = "https://httpbin.org/image/png"
         let expectation = self.expectation(description: "Request should return PNG response image")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         sessionManager.request(urlString)
@@ -101,7 +101,7 @@ class DataRequestTestCase: BaseTestCase {
         let urlString = "https://httpbin.org/image/jpeg"
         let expectation = self.expectation(description: "Request should return JPG response image")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         sessionManager.request(urlString)
@@ -137,7 +137,7 @@ class DataRequestTestCase: BaseTestCase {
         let url = self.url(forResource: "apple", withExtension: "jpg")
         let expectation = self.expectation(description: "Request should return JPG response image")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         sessionManager.request(url)
@@ -177,7 +177,7 @@ class DataRequestTestCase: BaseTestCase {
         let urlString = "https://httpbin.org/image/png"
         let expectation = self.expectation(description: "Request should return PNG response image")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         sessionManager.request(urlString)
@@ -209,7 +209,7 @@ class DataRequestTestCase: BaseTestCase {
         let urlString = "https://httpbin.org/image/jpeg"
         let expectation = self.expectation(description: "Request should return JPG response image")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         sessionManager.request(urlString)
@@ -245,7 +245,7 @@ class DataRequestTestCase: BaseTestCase {
         let urlString = "https://invalid.for.sure"
         let expectation = self.expectation(description: "Request should fail with bad URL")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         sessionManager.request(urlString)
@@ -268,7 +268,7 @@ class DataRequestTestCase: BaseTestCase {
         let urlString = "https://httpbin.org/image/webp"
         let expectation = self.expectation(description: "Request should return webp response image")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         sessionManager.request(urlString)
@@ -297,7 +297,7 @@ class DataRequestTestCase: BaseTestCase {
         let urlString = "https://httpbin.org/bytes/0"
         let expectation = self.expectation(description: "Request should download no bytes")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         sessionManager.request(urlString)
@@ -327,7 +327,7 @@ class DataRequestTestCase: BaseTestCase {
         let urlString = "https://httpbin.org/bytes/\(randomBytes)"
         let expectation = self.expectation(description: "Request should download random bytes")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         sessionManager.request(urlString)
@@ -356,7 +356,7 @@ class DataRequestTestCase: BaseTestCase {
         let urlString = "https://httpbin.org/get"
         let expectation = self.expectation(description: "Request should return JSON")
 
-        var response: DataResponse<Image>?
+        var response: DataResponse<MetadataImage>?
 
         // When
         sessionManager.request(urlString)

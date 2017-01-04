@@ -131,7 +131,7 @@ extension UIButton {
         filter: ImageFilter? = nil,
         progress: ImageDownloader.ProgressHandler? = nil,
         progressQueue: DispatchQueue = DispatchQueue.main,
-        completion: ((DataResponse<UIImage>) -> Void)? = nil)
+        completion: ((DataResponse<MetadataImage>) -> Void)? = nil)
     {
         af_setImage(
             for: state,
@@ -170,11 +170,11 @@ extension UIButton {
         filter: ImageFilter? = nil,
         progress: ImageDownloader.ProgressHandler? = nil,
         progressQueue: DispatchQueue = DispatchQueue.main,
-        completion: ((DataResponse<UIImage>) -> Void)? = nil)
+        completion: ((DataResponse<MetadataImage>) -> Void)? = nil)
     {
         guard !isImageURLRequest(urlRequest, equalToActiveRequestURLForState: state) else {
             let error = AFIError.requestCancelled
-            let response = DataResponse<UIImage>(request: nil, response: nil, data: nil, result: .failure(error))
+            let response = DataResponse<MetadataImage>(request: nil, response: nil, data: nil, result: .failure(error))
 
             completion?(response)
 
@@ -191,14 +191,14 @@ extension UIButton {
             let request = urlRequest.urlRequest,
             let image = imageCache?.image(for: request, withIdentifier: filter?.identifier)
         {
-            let response = DataResponse<UIImage>(
+            let response = DataResponse<MetadataImage>(
                 request: urlRequest.urlRequest,
                 response: nil,
                 data: nil,
                 result: .success(image)
             )
 
-            setImage(image, for: state)
+            setImage(image.image, for: state)
             completion?(response)
 
             return
@@ -228,7 +228,7 @@ extension UIButton {
                 }
 
                 if let image = response.result.value {
-                    strongSelf.setImage(image, for: state)
+                    strongSelf.setImage(image.image, for: state)
                 }
 
                 strongSelf.setImageRequestReceipt(nil, for: state)
@@ -278,7 +278,7 @@ extension UIButton {
         filter: ImageFilter? = nil,
         progress: ImageDownloader.ProgressHandler? = nil,
         progressQueue: DispatchQueue = DispatchQueue.main,
-        completion: ((DataResponse<UIImage>) -> Void)? = nil)
+        completion: ((DataResponse<MetadataImage>) -> Void)? = nil)
     {
         af_setBackgroundImage(
             for: state,
@@ -317,11 +317,11 @@ extension UIButton {
         filter: ImageFilter? = nil,
         progress: ImageDownloader.ProgressHandler? = nil,
         progressQueue: DispatchQueue = DispatchQueue.main,
-        completion: ((DataResponse<UIImage>) -> Void)? = nil)
+        completion: ((DataResponse<MetadataImage>) -> Void)? = nil)
     {
         guard !isImageURLRequest(urlRequest, equalToActiveRequestURLForState: state) else {
             let error = AFIError.requestCancelled
-            let response = DataResponse<UIImage>(request: nil, response: nil, data: nil, result: .failure(error))
+            let response = DataResponse<MetadataImage>(request: nil, response: nil, data: nil, result: .failure(error))
 
             completion?(response)
 
@@ -338,14 +338,14 @@ extension UIButton {
             let request = urlRequest.urlRequest,
             let image = imageCache?.image(for: request, withIdentifier: filter?.identifier)
         {
-            let response = DataResponse<UIImage>(
+            let response = DataResponse<MetadataImage>(
                 request: urlRequest.urlRequest,
                 response: nil,
                 data: nil,
                 result: .success(image)
             )
 
-            setBackgroundImage(image, for: state)
+            setBackgroundImage(image.image, for: state)
             completion?(response)
 
             return
@@ -375,7 +375,7 @@ extension UIButton {
                 }
 
                 if let image = response.result.value {
-                    strongSelf.setBackgroundImage(image, for: state)
+                    strongSelf.setBackgroundImage(image.image, for: state)
                 }
 
                 strongSelf.setBackgroundImageRequestReceipt(nil, for: state)
