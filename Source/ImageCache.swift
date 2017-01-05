@@ -32,8 +32,8 @@ import Cocoa
 #endif
 
 open class MetadataImage {
-    let image: Image
-    let headers: [AnyHashable : Any]?
+    open let image: Image
+    open let headers: [AnyHashable : Any]?
     
     init(_ image: Image, headers: [AnyHashable : Any]?) {
         self.image = image
