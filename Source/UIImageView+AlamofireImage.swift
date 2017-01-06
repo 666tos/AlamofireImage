@@ -380,10 +380,11 @@ extension UIImageView {
 
             return
         }
+        
+        self.image = placeholderImage
 
         // Set the placeholder since we're going to have to download
-        if let placeholderImage = placeholderImage {
-            self.image = placeholderImage
+        if placeholderImage != nil {
             self.contentMode = placeholderContentMode
         }
 
