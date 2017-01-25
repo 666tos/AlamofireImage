@@ -31,7 +31,7 @@ import UIKit
 
 extension UIImageView {
     
-    public enum PlacholderPolicy {
+    public enum PlaceholderPolicy {
         case noPlaceholder
         case activityIndicatorOnly(UIActivityIndicatorViewStyle)
         case activityIndicatorThenPlaceholder(UIActivityIndicatorViewStyle, UIImage?, UIViewContentMode)
@@ -216,7 +216,7 @@ extension UIImageView {
     public func af_setImage(
         withURL urlString: String?,
         contentMode: UIViewContentMode = .scaleAspectFill,
-        placholderPolicy: PlacholderPolicy = .noPlaceholder,
+        placeholderPolicy: PlaceholderPolicy = .noPlaceholder,
         filter: ImageFilter? = nil,
         progress: ImageDownloader.ProgressHandler? = nil,
         progressQueue: DispatchQueue = DispatchQueue.main,
@@ -225,14 +225,14 @@ extension UIImageView {
         completion: ((DataResponse<MetadataImage>) -> Void)? = nil)
     {
         guard let urlString = urlString, let url = URL(string: urlString) else {
-            self.apply(placholderPolicy: placholderPolicy, shouldLoad: false)
+            self.apply(placeholderPolicy: placeholderPolicy, shouldLoad: false)
             return
         }
         
         af_setImage(
             withURL: url,
             contentMode: contentMode,
-            placholderPolicy: placholderPolicy,
+            placeholderPolicy: placeholderPolicy,
             filter: filter,
             progress: progress,
             progressQueue: progressQueue,
@@ -278,7 +278,7 @@ extension UIImageView {
     public func af_setImage(
         withURL url: URL,
         contentMode: UIViewContentMode = .scaleAspectFill,
-        placholderPolicy: PlacholderPolicy = .noPlaceholder,
+        placeholderPolicy: PlaceholderPolicy = .noPlaceholder,
         filter: ImageFilter? = nil,
         progress: ImageDownloader.ProgressHandler? = nil,
         progressQueue: DispatchQueue = DispatchQueue.main,
@@ -289,7 +289,7 @@ extension UIImageView {
         af_setImage(
             withURLRequest: urlRequest(with: url),
             contentMode: contentMode,
-            placholderPolicy: placholderPolicy,
+            placeholderPolicy: placeholderPolicy,
             filter: filter,
             progress: progress,
             progressQueue: progressQueue,
@@ -335,7 +335,7 @@ extension UIImageView {
     public func af_setImage(
         withURLRequest urlRequest: URLRequestConvertible,
         contentMode: UIViewContentMode = .scaleAspectFill,
-        placholderPolicy: PlacholderPolicy = .noPlaceholder,
+        placeholderPolicy: PlaceholderPolicy = .noPlaceholder,
         filter: ImageFilter? = nil,
         progress: ImageDownloader.ProgressHandler? = nil,
         progressQueue: DispatchQueue = DispatchQueue.main,
@@ -382,7 +382,7 @@ extension UIImageView {
             return
         }
         
-        self.apply(placholderPolicy: placholderPolicy, shouldLoad: true)
+        self.apply(placeholderPolicy: placeholderPolicy, shouldLoad: true)
 
         // Generate a unique download id to check whether the active request has changed while downloading
         let downloadID = UUID().uuidString
@@ -408,7 +408,7 @@ extension UIImageView {
                     strongSelf.run(imageTransition, with: image.image, contentMode: contentMode)
                 }
                 else {
-                    strongSelf.apply(placholderPolicy: placholderPolicy, shouldLoad: false)
+                    strongSelf.apply(placeholderPolicy: placeholderPolicy, shouldLoad: false)
                 }
 
                 strongSelf.af_activeRequestReceipt = nil
@@ -475,9 +475,9 @@ extension UIImageView {
         return false
     }
     
-    private func apply(placholderPolicy: PlacholderPolicy, shouldLoad: Bool)
+    private func apply(placeholderPolicy: PlaceholderPolicy, shouldLoad: Bool)
     {
-        switch (placholderPolicy)
+        switch (placeholderPolicy)
         {
             case .noPlaceholder:
                 self.image = nil

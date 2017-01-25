@@ -62,7 +62,7 @@ class ImageCell : UICollectionViewCell {
 
         imageView.af_setImage(
             withURL: URL(string: URLString)!,
-            placeholderImage: placeholderImage,
+            placeholderPolicy: .activityIndicatorThenPlaceholder(.gray, #imageLiteral(resourceName: "Placeholder Image"), .center),
             filter: AspectScaledToFillSizeWithRoundedCornersFilter(size: size, radius: 20.0),
             imageTransition: .crossDissolve(0.2)
         )

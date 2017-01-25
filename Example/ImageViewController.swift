@@ -55,7 +55,7 @@ class ImageViewController : UIViewController {
 
         imageView.af_setImage(
             withURL: URL,
-            placeholderImage: nil,
+            placeholderPolicy: .activityIndicatorOnly(.gray),
             filter: CircleFilter(),
             imageTransition: .flipFromBottom(0.5)
         )

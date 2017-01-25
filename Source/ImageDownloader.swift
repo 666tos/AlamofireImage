@@ -323,7 +323,7 @@ open class ImageDownloader {
                 queue: self.responseQueue,
                 responseSerializer: imageResponseSerializer,
                 completionHandler: { [weak self] response in
-                    guard let strongSelf = self, let request = response.request, let httpResponse = response.response else { return }
+                    guard let strongSelf = self, let request = response.request else { return }
 
                     defer {
                         strongSelf.safelyDecrementActiveRequestCount()
@@ -338,41 +338,42 @@ open class ImageDownloader {
                         return
                     }
 
-                    switch response.result {
-                    case .success(let image):
-                        var filteredImages: [String: Image] = [:]
-
-                        for (_, filter, completion) in responseHandler.operations {
-                            var filteredImage: Image
-
-                            if let filter = filter {
-                                if let alreadyFilteredImage = filteredImages[filter.identifier] {
-                                    filteredImage = alreadyFilteredImage
-                                } else {
-                                    filteredImage = filter.filter(image.image)
-                                    filteredImages[filter.identifier] = filteredImage
-                                }
-                            } else {
-                                filteredImage = image.image
-                            }
-
-                            strongSelf.imageCache?.add(filteredImage, for: httpResponse, withIdentifier: filter?.identifier)
-                            
-                            DispatchQueue.main.async {
-                                let response = DataResponse<MetadataImage>(
-                                    request: response.request,
-                                    response: response.response,
-                                    data: response.data,
-                                    result: .success(MetadataImage(filteredImage, headers: image.headers)),
-                                    timeline: response.timeline
-                                )
-
-                                completion?(response)
-                            }
-                        }
-                    case .failure:
+                    guard let httpResponse = response.response, case .success(let image) = response.result else {
                         for (_, _, completion) in responseHandler.operations {
                             DispatchQueue.main.async { completion?(response) }
+                        }
+                        
+                        return
+                    }
+                    
+                    var filteredImages: [String: Image] = [:]
+
+                    for (_, filter, completion) in responseHandler.operations {
+                        var filteredImage: Image
+
+                        if let filter = filter {
+                            if let alreadyFilteredImage = filteredImages[filter.identifier] {
+                                filteredImage = alreadyFilteredImage
+                            } else {
+                                filteredImage = filter.filter(image.image)
+                                filteredImages[filter.identifier] = filteredImage
+                            }
+                        } else {
+                            filteredImage = image.image
+                        }
+
+                        strongSelf.imageCache?.add(filteredImage, for: httpResponse, withIdentifier: filter?.identifier)
+                        
+                        DispatchQueue.main.async {
+                            let response = DataResponse<MetadataImage>(
+                                request: response.request,
+                                response: response.response,
+                                data: response.data,
+                                result: .success(MetadataImage(filteredImage, headers: image.headers)),
+                                timeline: response.timeline
+                            )
+
+                            completion?(response)
                         }
                     }
                 }
