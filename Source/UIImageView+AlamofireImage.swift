@@ -30,6 +30,13 @@ import Foundation
 import UIKit
 
 extension UIImageView {
+    
+    public enum PlacholderPolicy {
+        case noPlaceholder
+        case activityIndicatorOnly(UIActivityIndicatorViewStyle)
+        case activityIndicatorThenPlaceholder(UIActivityIndicatorViewStyle, UIImage?, UIViewContentMode)
+        case onlyPlaceholder(UIImage?, UIViewContentMode)
+    }
 
     // MARK: - ImageTransition
 
@@ -128,6 +135,7 @@ extension UIImageView {
         static var imageDownloader = "af_UIImageView.ImageDownloader"
         static var sharedImageDownloader = "af_UIImageView.SharedImageDownloader"
         static var activeRequestReceipt = "af_UIImageView.ActiveRequestReceipt"
+        static var activityIndicator = "af_UIImageView.ActivityIndicator"
     }
 
     // MARK: - Associated Properties
@@ -208,8 +216,7 @@ extension UIImageView {
     public func af_setImage(
         withURL urlString: String?,
         contentMode: UIViewContentMode = .scaleAspectFill,
-        placeholderImage: UIImage? = nil,
-        placeholderContentMode: UIViewContentMode = .center,
+        placholderPolicy: PlacholderPolicy = .noPlaceholder,
         filter: ImageFilter? = nil,
         progress: ImageDownloader.ProgressHandler? = nil,
         progressQueue: DispatchQueue = DispatchQueue.main,
@@ -218,18 +225,14 @@ extension UIImageView {
         completion: ((DataResponse<MetadataImage>) -> Void)? = nil)
     {
         guard let urlString = urlString, let url = URL(string: urlString) else {
-            if let placeholderImage = placeholderImage {
-                self.image = placeholderImage
-                self.contentMode = placeholderContentMode
-            }
+            self.apply(placholderPolicy: placholderPolicy, shouldLoad: false)
             return
         }
         
         af_setImage(
             withURL: url,
             contentMode: contentMode,
-            placeholderImage: placeholderImage,
-            placeholderContentMode: placeholderContentMode,
+            placholderPolicy: placholderPolicy,
             filter: filter,
             progress: progress,
             progressQueue: progressQueue,
@@ -275,8 +278,7 @@ extension UIImageView {
     public func af_setImage(
         withURL url: URL,
         contentMode: UIViewContentMode = .scaleAspectFill,
-        placeholderImage: UIImage? = nil,
-        placeholderContentMode: UIViewContentMode = .center,
+        placholderPolicy: PlacholderPolicy = .noPlaceholder,
         filter: ImageFilter? = nil,
         progress: ImageDownloader.ProgressHandler? = nil,
         progressQueue: DispatchQueue = DispatchQueue.main,
@@ -287,8 +289,7 @@ extension UIImageView {
         af_setImage(
             withURLRequest: urlRequest(with: url),
             contentMode: contentMode,
-            placeholderImage: placeholderImage,
-            placeholderContentMode: placeholderContentMode,
+            placholderPolicy: placholderPolicy,
             filter: filter,
             progress: progress,
             progressQueue: progressQueue,
@@ -334,8 +335,7 @@ extension UIImageView {
     public func af_setImage(
         withURLRequest urlRequest: URLRequestConvertible,
         contentMode: UIViewContentMode = .scaleAspectFill,
-        placeholderImage: UIImage? = nil,
-        placeholderContentMode: UIViewContentMode = .center,
+        placholderPolicy: PlacholderPolicy = .noPlaceholder,
         filter: ImageFilter? = nil,
         progress: ImageDownloader.ProgressHandler? = nil,
         progressQueue: DispatchQueue = DispatchQueue.main,
@@ -373,6 +373,7 @@ extension UIImageView {
                     completion?(response)
                 }
             } else {
+                self.af_activityIndicator?.stopAnimating()
                 self.image = image.image
                 self.contentMode = contentMode
                 completion?(response)
@@ -381,12 +382,7 @@ extension UIImageView {
             return
         }
         
-        self.image = placeholderImage
-
-        // Set the placeholder since we're going to have to download
-        if placeholderImage != nil {
-            self.contentMode = placeholderContentMode
-        }
+        self.apply(placholderPolicy: placholderPolicy, shouldLoad: true)
 
         // Generate a unique download id to check whether the active request has changed while downloading
         let downloadID = UUID().uuidString
@@ -410,6 +406,9 @@ extension UIImageView {
 
                 if let image = response.result.value {
                     strongSelf.run(imageTransition, with: image.image, contentMode: contentMode)
+                }
+                else {
+                    strongSelf.apply(placholderPolicy: placholderPolicy, shouldLoad: false)
                 }
 
                 strongSelf.af_activeRequestReceipt = nil
@@ -440,11 +439,15 @@ extension UIImageView {
     /// - parameter imageTransition: The image transition to ran on the image view.
     /// - parameter image:           The image to use for the image transition.
     public func run(_ imageTransition: ImageTransition, with image: Image, contentMode: UIViewContentMode) {
+        self.af_activityIndicator?.stopAnimating()
+        
         UIView.transition(
             with: self,
             duration: imageTransition.duration,
             options: imageTransition.animationOptions,
-            animations: { imageTransition.animations(self, image, contentMode) },
+            animations: {
+                imageTransition.animations(self, image, contentMode)
+            },
             completion: imageTransition.completion
         )
     }
@@ -465,12 +468,77 @@ extension UIImageView {
         if
             let currentRequestURL = af_activeRequestReceipt?.request.task?.originalRequest?.url,
             let requestURL = urlRequest?.urlRequest?.url,
-            currentRequestURL == requestURL
-        {
+            currentRequestURL == requestURL {
             return true
         }
 
         return false
+    }
+    
+    private func apply(placholderPolicy: PlacholderPolicy, shouldLoad: Bool)
+    {
+        switch (placholderPolicy)
+        {
+            case .noPlaceholder:
+                self.image = nil
+                self.af_activityIndicator?.stopAnimating()
+            
+            case .activityIndicatorOnly(let activityIndicatorStyle):
+                self.image = nil
+                
+                if (shouldLoad) {
+                    let activityIndicator = self.af_getActivityIndicator(style: activityIndicatorStyle)
+                    activityIndicator.startAnimating()
+                }
+                else {
+                    self.af_activityIndicator?.stopAnimating()
+                }
+            
+            case .activityIndicatorThenPlaceholder(let activityIndicatorStyle, let placeholderImage, let placeholderContentMode):
+                if (shouldLoad) {
+                    self.image = nil
+                    let activityIndicator = self.af_getActivityIndicator(style: activityIndicatorStyle)
+                    activityIndicator.startAnimating()
+                }
+                else {
+                    self.image = placeholderImage
+                    self.contentMode = placeholderContentMode
+                    self.af_activityIndicator?.stopAnimating()
+                }
+            
+            case .onlyPlaceholder(let placeholderImage, let placeholderContentMode):
+                self.af_activityIndicator?.stopAnimating()
+                self.image = placeholderImage
+                self.contentMode = placeholderContentMode
+            
+        }
+    }
+    
+    private func af_getActivityIndicator(style: UIActivityIndicatorViewStyle) -> UIActivityIndicatorView
+    {
+        if let activityIndicator = self.af_activityIndicator
+        {
+            return activityIndicator
+        }
+        
+        let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: style)
+        activityIndicator.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin, .flexibleBottomMargin]
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.center = CGPoint(x: self.bounds.midX, y: self.bounds.midY)
+        self.addSubview(activityIndicator)
+        self.af_activityIndicator = activityIndicator
+        return activityIndicator
+    }
+    
+    private var af_activityIndicator: UIActivityIndicatorView?
+    {
+        get {
+            return objc_getAssociatedObject(self, &AssociatedKey.activityIndicator) as? UIActivityIndicatorView
+        }
+        
+        set {
+            objc_setAssociatedObject(self, &AssociatedKey.activityIndicator, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
     }
 }
 
