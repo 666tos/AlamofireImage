@@ -115,6 +115,8 @@ open class AutoPurgingImageCache: ImageRequestCache {
     /// The preferred memory usage after purge in bytes. During a purge, images will be purged until the memory
     /// capacity drops below this limit.
     open let preferredMemoryUsageAfterPurge: UInt64
+    
+    open let debugLoggingEnabled: Bool
 
     private let synchronizationQueue: DispatchQueue
     private var cachedImages: [String: CachedImage]
@@ -131,9 +133,10 @@ open class AutoPurgingImageCache: ImageRequestCache {
     /// - parameter preferredMemoryUsageAfterPurge: The preferred memory usage after purge in bytes. `60 MB` by default.
     ///
     /// - returns: The new `AutoPurgingImageCache` instance.
-    public init(memoryCapacity: UInt64 = 100_000_000, preferredMemoryUsageAfterPurge: UInt64 = 60_000_000) {
+    public init(memoryCapacity: UInt64 = 100_000_000, preferredMemoryUsageAfterPurge: UInt64 = 60_000_000, debugLoggingEnabled: Bool = false) {
         self.memoryCapacity = memoryCapacity
         self.preferredMemoryUsageAfterPurge = preferredMemoryUsageAfterPurge
+        self.debugLoggingEnabled = debugLoggingEnabled
 
         precondition(
             memoryCapacity >= preferredMemoryUsageAfterPurge,
@@ -193,14 +196,30 @@ open class AutoPurgingImageCache: ImageRequestCache {
                     let date1 = $0.lastAccessDate
                     let date2 = $1.lastAccessDate
 
-                    return date1.timeIntervalSince(date2) < 0.0
+                    return date1 < date2
+                }
+                
+                if (self.debugLoggingEnabled) {
+                    print("--------------")
+                    for sortedImage in sortedImages {
+                        print("image: \(sortedImage.identifier), lastAccessDate: \(sortedImage.lastAccessDate)")
+                    }
                 }
 
                 var bytesPurged = UInt64(0)
+                
+                if (self.debugLoggingEnabled)
+                {
+                    print("Purge images currentMemoryUsage: \(Double(self.currentMemoryUsage)/1024.0/1024.0)Mb")
+                }
 
                 for cachedImage in sortedImages {
                     self.cachedImages.removeValue(forKey: cachedImage.identifier)
                     bytesPurged += cachedImage.totalBytes
+                    
+                    if (self.debugLoggingEnabled) {
+                        print("removed image: \(cachedImage.identifier), size: \(Double(cachedImage.totalBytes)/1024.0/1024.0)Mb)")
+                    }
 
                     if bytesPurged >= bytesToPurge {
                         break
@@ -208,6 +227,15 @@ open class AutoPurgingImageCache: ImageRequestCache {
                 }
 
                 self.currentMemoryUsage -= bytesPurged
+                
+                if (self.debugLoggingEnabled) {
+                    print("images left: \(self.cachedImages.count), currentMemoryUsage: \(Double(self.currentMemoryUsage)/1024.0/1024.0)Mb")
+                    for cachedImage in self.cachedImages {
+                        print("images: \(cachedImage.1.identifier), size: \(Double(cachedImage.1.totalBytes)/1024.0/1024.0)Mb")
+                    }
+                    
+                    print("--------------")
+                }
             }
         }
     }
@@ -233,6 +261,10 @@ open class AutoPurgingImageCache: ImageRequestCache {
             }
         }
         
+        if (self.debugLoggingEnabled) {
+            print("removeImageForRequest: \(request.url), currentMemoryUsage: \(self.currentMemoryUsage)")
+        }
+        
         return removed
     }
 
@@ -254,6 +286,10 @@ open class AutoPurgingImageCache: ImageRequestCache {
                 }
             }
         }
+        
+        if (self.debugLoggingEnabled) {
+            print("removeImagesMatchingRequest: \(request.url), currentMemoryUsage: \(self.currentMemoryUsage)")
+        }
 
         return removed
     }
@@ -272,6 +308,10 @@ open class AutoPurgingImageCache: ImageRequestCache {
 
                 removed = true
             }
+        }
+        
+        if (self.debugLoggingEnabled) {
+            print("removeAllImages")
         }
 
         return removed
