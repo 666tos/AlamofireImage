@@ -461,14 +461,20 @@ open class ImageDownloader {
         completion: CompletionHandler? = nil)
         -> [RequestReceipt]
     {
-        let urlRequests = urls.flatMap { (urlString: String) -> URLRequest? in
-            guard let url = URL(string: urlString) else {
-                return nil
-            }
-            
-            return ImageDownloader.urlRequest(with: url)
-        }
-        
+        let urls = urls.flatMap { URL(string: $0) }
+        return self.download(urls, filter: filter, progress: progress, progressQueue: progressQueue, completion: completion)
+    }
+    
+    @discardableResult
+    open func download(
+        _ urls: [URL],
+        filter: ImageFilter? = nil,
+        progress: ProgressHandler? = nil,
+        progressQueue: DispatchQueue = DispatchQueue.main,
+        completion: CompletionHandler? = nil)
+        -> [RequestReceipt]
+    {
+        let urlRequests = urls.map { ImageDownloader.urlRequest(with: $0) }
         return self.download(urlRequests, filter: filter, progress: progress, progressQueue: progressQueue, completion: completion)
     }
 
