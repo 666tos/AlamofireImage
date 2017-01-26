@@ -287,7 +287,7 @@ extension UIImageView {
         completion: ((DataResponse<MetadataImage>) -> Void)? = nil)
     {
         af_setImage(
-            withURLRequest: urlRequest(with: url),
+            withURLRequest: ImageDownloader.urlRequest(with: url),
             contentMode: contentMode,
             placeholderPolicy: placeholderPolicy,
             filter: filter,
@@ -453,16 +453,6 @@ extension UIImageView {
     }
 
     // MARK: - Private - URL Request Helper Methods
-
-    private func urlRequest(with url: URL) -> URLRequest {
-        var urlRequest = URLRequest(url: url)
-
-        for mimeType in DataRequest.acceptableImageContentTypes {
-            urlRequest.addValue(mimeType, forHTTPHeaderField: "Accept")
-        }
-
-        return urlRequest
-    }
 
     private func isURLRequestURLEqualToActiveRequestURL(_ urlRequest: URLRequestConvertible?) -> Bool {
         if

@@ -135,7 +135,7 @@ extension UIButton {
     {
         af_setImage(
             for: state,
-            urlRequest: urlRequest(with: url),
+            urlRequest: ImageDownloader.urlRequest(with: url),
             placeholderImage: placeholderImage,
             filter: filter,
             progress: progress,
@@ -282,7 +282,7 @@ extension UIButton {
     {
         af_setBackgroundImage(
             for: state,
-            urlRequest: urlRequest(with: url),
+            urlRequest: ImageDownloader.urlRequest(with: url),
             placeholderImage: placeholderImage,
             filter: filter,
             progress: progress,
@@ -457,16 +457,6 @@ extension UIButton {
         }
 
         return false
-    }
-
-    private func urlRequest(with url: URL) -> URLRequest {
-        var urlRequest = URLRequest(url: url)
-
-        for mimeType in DataRequest.acceptableImageContentTypes {
-            urlRequest.addValue(mimeType, forHTTPHeaderField: "Accept")
-        }
-
-        return urlRequest
     }
 }
 

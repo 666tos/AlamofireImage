@@ -230,6 +230,16 @@ open class ImageDownloader {
             self.credential = credential
         }
     }
+    
+    open class func urlRequest(with url: URL) -> URLRequest {
+        var urlRequest = URLRequest(url: url)
+        
+        for mimeType in DataRequest.acceptableImageContentTypes {
+            urlRequest.addValue(mimeType, forHTTPHeaderField: "Accept")
+        }
+        
+        return urlRequest
+    }
 
     // MARK: Download
 
@@ -440,6 +450,26 @@ open class ImageDownloader {
         return urlRequests.flatMap {
             download($0, filter: filter, progress: progress, progressQueue: progressQueue, completion: completion)
         }
+    }
+    
+    @discardableResult
+    open func download(
+        _ urls: [String],
+        filter: ImageFilter? = nil,
+        progress: ProgressHandler? = nil,
+        progressQueue: DispatchQueue = DispatchQueue.main,
+        completion: CompletionHandler? = nil)
+        -> [RequestReceipt]
+    {
+        let urlRequests = urls.flatMap { (urlString: String) -> URLRequest? in
+            guard let url = URL(string: urlString) else {
+                return nil
+            }
+            
+            return ImageDownloader.urlRequest(with: url)
+        }
+        
+        return self.download(urlRequests, filter: filter, progress: progress, progressQueue: progressQueue, completion: completion)
     }
 
     /// Cancels the request in the receipt by removing the response handler and cancelling the request if necessary.
